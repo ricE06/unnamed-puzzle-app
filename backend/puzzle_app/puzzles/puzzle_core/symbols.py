@@ -21,6 +21,13 @@ class Symbol():
         """
         raise NotImplementedError('TODO: implement dump for Symbol class')
 
+    def __str__(self):
+        """
+        String representation of the symbol for internal use.
+        """
+        return self.short_name
+        
+
 class Number(Symbol):
     """
     Represents a numeric symbol.
@@ -44,6 +51,7 @@ class BuiltinSymbols():
     """
     Collection of all the symbols used across puzzles.
     """
+    _MAX_NUM = 31
     empty = Symbol('_', 'empty')
     white = Colored('WH')
     black = Colored('BK')
@@ -51,3 +59,14 @@ class BuiltinSymbols():
     @staticmethod
     def numeral(n):
         return Number(n)
+
+    @classmethod
+    def all_numerals(cls):
+        """
+        Constructs all the number symbols and returns as a list.
+        """
+        out = []
+        for val in range(cls._MAX_NUM):
+            out.append(cls.numeral(val))
+        return out
+

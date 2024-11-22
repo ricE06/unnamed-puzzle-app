@@ -21,6 +21,13 @@ class Vertex():
 
     def __init__(self) -> None:
         self.symbols = [] # list of Symbol objects
+
+    def symbols_str(self) -> str:
+        """
+        Returns the short names of all of the symbols on the vertex,
+        joined by the `-` character.
+        """
+        return '-'.join(map(str, self.symbols))
     
 class RectVertex(Vertex):
     """
@@ -97,9 +104,12 @@ class Grid(ABC): # abstract class
         Returns the length of the longest symbol `short_name`
         attribute for printing to the terminal and saving a puzzle as text.
         """
+        def len_of_all_symbols(vertex: Vertex) -> int:
+            return len(vertex.symbols_str())
+
         max_len = 0
-        for symbol in self.all_symbols:
-            if new_len := len(symbol.short_name) > max_len:
+        for vertex in self.vertices:
+            if (new_len := len_of_all_symbols(vertex)) > max_len:
                 max_len = new_len
         return max_len
 
@@ -137,16 +147,53 @@ class RectGrid(Grid):
     def __str__(self) -> str:
         sep_len = self.longest_symbol_len + 1
 
-        out = ""
+        out: str = ""
         count_per_line = 0
         for vertex in self:
             # we know these are ordered
             count_per_line += 1
-            sym = vertex.symbols[-1]
+            sym = vertex.symbols_str()
             out += sym
             out += self.display_sep * (sep_len - len(sym))
             if count_per_line >= self.width:
                 out += "\n" # make a new line, reset count
                 count_per_line = 0
         return out
+
+    def get_vertex(self, row_idx: int, col_idx: int) -> RectVertex:
+        """
+        Returns the RectVertex at a certain row index and column index.
+        """
+        return self.vertices[row_idx*self.width + col_idx]
+
+    def add_symbol(self, row_idx: int, col_idx: int, new_symbol: Symbol) -> None:
+        """
+        Appends `new_symbol` onto the vertex described by row_idx and col_idx.
+        """
+        vertex = self.get_vertex(row_idx, col_idx)
+        vertex.symbols.append(new_symbol)
+
+    def replace_symbols(self, row_idx: int, col_idx: int, new_symbols: list[Symbol]) -> None:
+        """
+        Replaces all the symbols at an vertex to the new symbols list.
+        """
+        vertex = self.get_vertex(row_idx, col_idx)
+        vertex.symbols = new_symbols.copy() # shallow copy is okay, we aren't changing Symbols
+
+    def populate_by_coords(self, data: list[tuple[int, int, Symbol]]) -> None:
+        """
+        Adds symbols to the grid. Will override any existing symbols if needed,
+        everything else is left alone.
+
+        Args:
+            data: list of tuples with three entries each:
+                row (int)
+                col (int)
+                symbol (Symbol object)
+
+        Returns: none
+        """
+        raise NotImplementedError
+
+
 

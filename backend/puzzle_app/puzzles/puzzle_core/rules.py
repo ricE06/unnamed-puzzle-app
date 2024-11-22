@@ -2,7 +2,6 @@
 This file implements classes related to puzzle rules.
 """
 from abc import ABC, abstractmethod
-from puzzles.puzzle_core.puzzles import Puzzle
 
 class Rule(ABC): # abstract class
     """
@@ -19,7 +18,7 @@ class Rule(ABC): # abstract class
         pass
 
     @abstractmethod
-    def check(self, solution: Puzzle) -> bool:
+    def check(self, solution) -> bool:
         """
         Returns True if the solution satisfies the rule, False otherwise.
         """
@@ -38,7 +37,7 @@ class SuperRule(Rule):
     def __init__(self, subrules: list[Rule]) -> None:
         self.subrules = subrules
 
-    def check(self, solution: Puzzle) -> bool:
+    def check(self, solution) -> bool:
         """
         Returns True if the solution satisfies the superrule, False otherwise.
         """
