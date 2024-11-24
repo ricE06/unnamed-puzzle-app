@@ -44,7 +44,7 @@ class TextParser():
     class Parser(ABC):
 
         def parse(self, tokens: str|list) -> Any:
-            print(self.__class__.__name__)
+            print(f'{tokens=} in `parse`')
             if isinstance(tokens, list):
                 if len(tokens) == 0:
                     return []
@@ -88,6 +88,18 @@ class TextParser():
         def __init__(self, sub_parser):
             self.sub_parser = sub_parser
 
+        def _parse_depreciated(self, tokens: str|list) -> Any:
+            """This function serves no purpose as of now."""
+            print(f'{tokens=} in ListParser `parse`')
+            if isinstance(tokens, list) and len(tokens) == 0:
+                return []
+            if (isinstance(tokens, str) 
+                or max(isinstance(token, str) for token in tokens)):
+                # at least one token is a pure string
+                # so we implicitly re-wrap
+                tokens = [tokens]
+            return super().parse(tokens)
+
         def parse_one(self, token: str|list) -> Any:
             return self.sub_parser.parse(token)
 
@@ -100,13 +112,14 @@ class TextParser():
             self.out_dict = {}
 
         def parse(self, tokens: str|list) -> Any:
+            print(f'{tokens=} in DictParser `parse`')
             super().parse(tokens)
             copy = self.out_dict # careful, not a shallow copy
             self.out_dict = {}
             return copy
 
         def parse_one(self, token: str|list) -> Any:
-            print(token)
+            print(f'{token=} in `parse_one`')
             if isinstance(token, str):
                 if token[0] not in self.IMPLICIT_KEYS:
                     raise TextParser.TextParsingError(f'No implicit key found for {token}!')
@@ -196,11 +209,20 @@ class TextParser():
         tokens = cls.nested_tokens_txt(inp_txt)
         return [cls._parse_puzzle(puzz) for puzz in tokens]
 
-    SUBPUZZLE_FLAGS = {'--rules': {'parser': ListParser(DictParser(BaseParser())), 'name': 'rules'},
+    SUBPUZZLE_FLAG_PREFIX = '--'
+    SUBPUZZLE_FLAGS = {'--rules': {'parser': ListParser(DictParser(BaseParser())), 
+                                   'name': 'rules',
+                                   'smart_wrap': False},
                        '--grid': {'parser': DictParser(BaseParser()), 'name': 'grid'},
                        '--vertices': {'parser': DictParser(BaseParser(), 
                                                            custom_parsers={'data': StateParser()}), 
-                                      'name': 'vertices'}}
+                                      'name': 'vertices'},
+                       '--symbols': {'parser': ListParser(SelfParser()),
+                                     'name': 'symbols',
+                                     'smart_wrap': False},
+                       '--editlayers': {'parser': ListParser(DictParser(BaseParser())),
+                                        'name': 'editlayers',
+                                        'smart_wrap': False}}
 
     @classmethod
     def _parse_puzzle(cls, tokens: list[list|str]) -> dict[str, Any]:
@@ -212,20 +234,39 @@ class TextParser():
                 should be passed into the PuzzleConstructor
         """
         out = {}
-        ptr = 0
-        print(tokens)
-        while ptr < len(tokens) // 2:
-            flag, expr = tokens[2*ptr], tokens[2*ptr+1]
-            if not isinstance(flag, str):
-                raise cls.TextParsingError(f"Flag {flag} is not a string!")
-            if (flag := flag.lower()) not in cls.SUBPUZZLE_FLAGS:
-                raise cls.TextParsingError(f"Subpuzzle flag {flag} not recognized!")
-            # parse and add to dict
-            print(f'{expr=}')
+        def add_attr_smart_wrapping(flag: str, expr: list|str) -> None:
+            """Adds expr to out. Wraps it in a list if needed."""
+            # if the wrapper is explicitly given, no need to re-wrap in a new list
+            if (len(expr) == 1 
+                and isinstance(expr[0], list)
+                and cls.SUBPUZZLE_FLAGS[flag].get('smart_wrap', True)):
+                expr = expr[0]
             puzzle_attr = cls.SUBPUZZLE_FLAGS[flag]['parser'].parse(expr)
             out[cls.SUBPUZZLE_FLAGS[flag]['name']] = puzzle_attr
-            # move to next token
-            ptr += 1
+            return None
+
+        start_ptr = 0
+        last_flag = None
+        for ptr, flag in enumerate(tokens):
+            if not (isinstance(flag, str) 
+                    and flag.startswith(cls.SUBPUZZLE_FLAG_PREFIX)): # wait until next flag
+                continue
+            if (flag := flag.lower()) not in cls.SUBPUZZLE_FLAGS:
+                raise cls.TextParsingError(f"Subpuzzle flag {flag} not recognized!")
+
+            # implicit wrapping of all the tokens in between into a list
+            expr = tokens[start_ptr+1:ptr]
+            start_ptr = ptr
+            # parse and add to dict
+            if last_flag is not None: 
+                add_attr_smart_wrapping(last_flag, expr)
+            last_flag = flag
+
+        # add the last flag to dict
+        if last_flag is None: 
+            raise cls.TextParsingError("No flags found in puzzle!")
+        expr = tokens[start_ptr+1:]
+        add_attr_smart_wrapping(last_flag, expr)
             
         return out
 

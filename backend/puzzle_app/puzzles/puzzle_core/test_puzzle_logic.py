@@ -68,7 +68,6 @@ class Test_Puzzles_Debug():
         assert str(puz) == exp
         grid.replace_symbols(1, 0, [BuiltinSymbols.numeral(14)])
         exp = "\n0  4  \n14 0  \n0  0  \n"
-        print(exp)
         assert str(puz) == exp
 
 class Test_Text_Tokenizer():
@@ -222,7 +221,7 @@ class Test_Text_Tokenizer():
         assert exp_2 == out_2
     
     def test_text_to_dict_1(self):
-        text = load_from_file('test_1.txt')
+        text = load_from_file('test_parsing.txt')
         output = TextParser.parse_txt(text)
         assert isinstance(output, list) # should be list of two puzzles
         assert len(output) == 2
@@ -237,7 +236,7 @@ class Test_Text_Tokenizer():
         assert output[0] == exp_1
 
     def test_text_to_dict_2(self):
-        text = load_from_file('test_1.txt')
+        text = load_from_file('test_parsing.txt')
         output = TextParser.parse_txt(text)
         exp_2 = {'rules': [{'type': 'Nurikabe'},
                            {'type': 'Sudoku', 'reg_height': 3, 'reg_width': 2}], 
@@ -250,6 +249,27 @@ class Test_Text_Tokenizer():
                               'encoding': 'full'}}
         assert output[1] == exp_2
 
+    def test_text_to_dict_implicit_wrapping(self):
+        text = load_from_file('test_implicit_wrapping.txt')
+        output = TextParser.parse_txt(text)
+        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'},],
+                 'grid': {'type': 'RectGrid',
+                          'height': 2, 'width': 2},
+                 'vertices': {'data': [tuple(), tuple(), tuple(), ('1',)],
+                              'type': 'RectVertex',}}
+        assert output[0] == exp
+
+    def test_text_to_dict_more_supertags(self):
+        text = load_from_file('test_implicit_wrapping.txt')
+        output = TextParser.parse_txt(text)
+        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'},],
+                 'grid': {'type': 'RectGrid',
+                          'height': 2, 'width': 2},
+                 'vertices': {'data': [tuple(), tuple(), tuple(), ('1',)],
+                              'type': 'RectVertex',},
+               'symbols': ['WH', 'BK', '1'],
+               'editlayers': [{'type': 'toggle', 'symbols': ['WH', 'BK']}]}
+        assert output[1] == exp
 
       
 
