@@ -17,11 +17,18 @@ LEFT_BRACE = '(' #)
 RIGHT_BRACE = ')' 
 
 
+class ConstructorError(Exception):
+    pass
+
 class PuzzleConstructor():
     """
     Contains helper functions to load puzzles.
     """
-    
+   
+    @staticmethod
+    def construct_from_dict(data: dict[str, Any]) -> Puzzle:
+        raise NotImplementedError
+
     @staticmethod
     def load_txt(data: str) -> Puzzle:
         """

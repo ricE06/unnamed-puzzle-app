@@ -9,10 +9,12 @@ class Symbol():
     """
     Represents a symbol that is used to fill a grid.
     """
+    builtin_symbols = {}
 
     def __init__(self, short_name: str, file_name: str) -> None:
         self.short_name = short_name
         self.file_name = file_name
+        self.builtin_symbols[short_name] = self
 
     def dump(self):
         """
@@ -55,6 +57,12 @@ class BuiltinSymbols():
     empty = Symbol('_', 'empty')
     white = Colored('WH')
     black = Colored('BK')
+
+    @staticmethod
+    def get_symbol(short_name: str) -> Symbol:
+        if short_name not in Symbol.builtin_symbols:
+            raise ValueError(f'Symbol {short_name} is not a built-in symbol!')
+        return Symbol.builtin_symbols[short_name]
 
     @staticmethod
     def numeral(n):

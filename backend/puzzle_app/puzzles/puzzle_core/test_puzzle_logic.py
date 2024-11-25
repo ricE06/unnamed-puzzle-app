@@ -272,10 +272,20 @@ class Test_Text_Tokenizer():
         assert output[1] == exp
 
       
-
-
 class Test_Puzzle_Construct():
     """
     Tests the constructor for both text and json formats.
     """
+
+    def test_text_construction_well_formed(self):
+        text = load_from_file('test_constructor.txt')
+        output = TextParser.parse_txt(text)
+        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'},],
+                 'grid': {'type': 'RectGrid',
+                          'height': 2, 'width': 2},
+                 'vertices': {'data': [tuple(), tuple(), tuple(), ('1',)],
+                              'type': 'RectVertex',},
+               'symbols': ['WH', 'BK', '1'],
+               'editlayers': [{'type': 'toggle', 'symbols': ['WH', 'BK']}]}
+        assert output[1] == exp
 

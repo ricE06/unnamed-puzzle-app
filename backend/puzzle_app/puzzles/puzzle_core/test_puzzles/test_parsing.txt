@@ -1,0 +1,58 @@
+% This puzzle has no rules and tests the text file constructor.
+% Any line marked with % will be ignored.
+
+% --Rules is processed as a list of dictionaries. Each entry
+% inside it must be wrapped in its own set of parens.
+
+% --Grid is processed as a normal dictionary.
+
+% --Vertices is processed as a normal dictionary with a special
+% attribute (see below).
+
+% In a dictionary, k-v pairs are given as two-element paren entries.
+% The first is a key, second is a value.
+% The exception is if an entry begins with '-', which which default
+% to the special key 'type', and the remainder of the string goes in 'value'
+% This is just for shorthand.
+
+% Only two components of this are hard-coded:
+% The flags "--Rules", "--Grid", and "--Vertices" must be given exactly.
+% In "--Vertices", the "data" attribute will trigger all the remaining
+% elements to be parsed as a StateParser 
+
+% In the future, the data parser will be signalled by another key (probably "@"?).
+% Also in the future, lists and dicts will be signalled by [] and {}.
+
+% These puzzles are incomplete and should not pass validation.
+
+( % begin puzzle
+--Rules 
+
+% This extra comment should be ignored.
+--Grid (-RectGrid (height 3) (width 3))
+--Vertices (-RectVertex (encoding full) (data
+_ _ 3
+_ _ _
+1 _ WH % So should this one.
+))
+
+) % end puzzle
+
+%%%%%%%%%%%%%
+
+(
+% this puzzle tests multiple states and rules
+
+--Rules 
+(-Nurikabe)
+(-Sudoku (reg_height 3) (reg_width 2))
+
+
+--Grid (-RectGrid (height 3) (width 4))
+--Vertices (-RectVertex (encoding full) (data
+_ WH-BK _ _
+_ 3-1-0 1-5 1
+BK          _         BK BK % whitespace should not matter
+))
+
+)

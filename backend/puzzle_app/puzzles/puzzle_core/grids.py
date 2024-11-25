@@ -2,8 +2,9 @@
 This file implements classes for puzzle grids.
 """
 from abc import ABC, abstractmethod
+from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import Lookup
 from puzzles.puzzle_core.symbols import Symbol
-
+from puzzles.puzzle_core.constructors import ConstructorError
 
 class Vertex(): 
     """
@@ -18,7 +19,6 @@ class Vertex():
             for a Solution object, they are either givens or 
             part of the solution.
     """
-
     def __init__(self) -> None:
         self.symbols = [] # list of Symbol objects
 
@@ -28,6 +28,7 @@ class Vertex():
         joined by the `-` character.
         """
         return '-'.join(map(str, self.symbols))
+
     
 class RectVertex(Vertex):
     """
@@ -52,6 +53,7 @@ class RectVertex(Vertex):
         return (self.row_idx, self.col_idx)
 
 
+
 class Grid(ABC): # abstract class
     """
     This is an abstract class for a puzzle grid. All grids are
@@ -69,6 +71,14 @@ class Grid(ABC): # abstract class
     def adjacent(self, vertex_1, vertex_2) -> bool:
         """
         Returns True if two vertex objects are adjacent to each other.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def init_vertices(self, vertex_data: dict) -> None:
+        """
+        Adds all the states to the vertices in `self.vertices`.
+        Depending on the grid type, it may add the vertices themselves too.
         """
         raise NotImplementedError
 
@@ -180,6 +190,18 @@ class RectGrid(Grid):
         vertex = self.get_vertex(row_idx, col_idx)
         vertex.symbols = new_symbols.copy() # shallow copy is okay, we aren't changing Symbols
 
+    def init_vertices(self, vertex_data: dict) -> None:
+        """
+        Adds symbols to each vertex in `self.vertices`.
+        """
+        if 'data' not in vertex_data:
+            raise ConstructorError('Vertices require a `data` attribute!')
+        encoding = vertex_data.get('encoding', 'full')
+        data = vertex_data['data']
+        if encoding == 'full':
+            raise NotImplementedError('TODO: implement `init_vertices`')
+        raise ConstructorError(f'Invalid encoding scheme {encoding}')
+
     def populate_by_coords(self, data: list[tuple[int, int, Symbol]]) -> None:
         """
         Adds symbols to the grid. Will override any existing symbols if needed,
@@ -195,5 +217,10 @@ class RectGrid(Grid):
         """
         raise NotImplementedError
 
+class VertexLookup(Lookup):
+    TABLE = {'rectvertex': RectVertex}
+
+class GridLookup(Lookup):
+    TABLE = {'rectgrid': RectGrid}
 
 

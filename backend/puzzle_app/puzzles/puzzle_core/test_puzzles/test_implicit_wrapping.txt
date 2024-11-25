@@ -1,0 +1,47 @@
+% this file tests the implicit wrapping feature of the 
+% text parser.
+% tokens between attr supertags do not need to be wrapped
+
+% this puzzle is incomplete and should not pass validation
+( 
+--Rules
+(-Nurikabe (symbol BK)) % implicitly wrapped in a 1-element list containing a dict
+
+--Grid 
+-RectGrid % implicitly wrapped in a dict, not a 1-element list
+(height 2)
+(width 2)
+
+--Vertices
+-RectVertex % implicitly wrapped in a dict, not a 1-element list
+% encoding is not needed, defaults to full
+(data
+_ _
+_ 1
+)
+
+) % end puzzle
+
+( 
+--Rules
+(-Nurikabe (symbol BK)) % implicitly wrapped in a 1-element list containing a dict
+
+--Grid 
+-RectGrid % implicitly wrapped in a dict, not a 1-element list
+(height 2)
+(width 2)
+
+--Vertices
+-RectVertex % implicitly wrapped in a dict, not a 1-element list
+% encoding is not needed, defaults to 'full'
+(data
+_ _
+_ 1
+)
+--Symbols
+WH BK 1 % implicitly wrapped in a 3-element list
+--EditLayers
+(-toggle (symbols WH BK)) % implicitly wrapped in a 1-element list containing a dict
+
+
+) % end puzzle

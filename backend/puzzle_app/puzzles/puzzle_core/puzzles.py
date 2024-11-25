@@ -3,7 +3,7 @@ This file implements the general Puzzle object.
 This is what ends up being stored and sent to the frontend.
 """
 import json
-from typing import Optional 
+from typing import Optional, Any
 from puzzles.puzzle_core.grids import Grid
 from puzzles.puzzle_core.rules import Rule
 from puzzles.puzzle_core.symbols import Symbol, BuiltinSymbols
@@ -26,11 +26,11 @@ class Puzzle():
     def __init__(self, grid: Grid, 
                  symbols: list[Symbol],
                  rules: list[Rule],
-                 editable_symbols: list[Symbol],
+                 editlayers: list[dict[str, Any]],
                  default_symbol: Optional[Symbol] = BuiltinSymbols.empty) -> None:
         self.grid = grid
         self.symbols = symbols
-        self.editable_symbols = editable_symbols
+        self.editlayers = editlayers
         self.rules = rules
 
         # set up defaults
