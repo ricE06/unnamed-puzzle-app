@@ -16,7 +16,7 @@ class Rule(ABC): # abstract class
     description = "Unknown rule."
 
     def __init__(self):
-        pass
+        self.type = self.__class__.__name__
 
     @abstractmethod
     def check(self, solution) -> bool:

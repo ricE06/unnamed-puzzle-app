@@ -238,7 +238,13 @@ class TextParser():
                             f'Assignment in DictParser requires a key and value!')
                 key, *val = token
                 if len(val) == 1: val = val[0]
-                parser = self.custom_parsers.get(key, self.sub_parser)
+
+                # parse states if needed
+                if key[0] in self.custom_parsers:
+                    parser = self.custom_parsers[key[0]]
+                    key = key[1:]
+                else:
+                    parser = self.sub_parser
                 val = parser.parse(val)
             self.out_dict[key] = val
         
@@ -322,7 +328,7 @@ class TextParser():
                                    'smart_wrap': False},
                        '--grid': {'parser': DictParser(BaseParser()), 'name': 'grid'},
                        '--vertices': {'parser': DictParser(BaseParser(), 
-                                                           custom_parsers={'data': StateParser()}), 
+                                                           custom_parsers={'@': StateParser()}), 
                                       'name': 'vertices'},
                        '--symbols': {'parser': ListParser(SelfParser()),
                                      'name': 'symbols',

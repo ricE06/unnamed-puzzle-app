@@ -4,12 +4,12 @@ Tests that should go here include:
     proper storage of puzzles
     proper loading of a puzzles from text files
     proper loading of puzzles from json files
-    correctly checking solution correctness for
-    every single rule
+    correctly checking solution correctness for every single rule
     string representation of puzzles
     superrule behavior
 """
 import pytest
+import pprint
 from typing import cast
 from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser, PuzzleConstructor
 from puzzles.puzzle_core.builtin_rules import Nurikabe
@@ -312,3 +312,12 @@ class Test_Puzzle_Construct():
         exp = [{'type': 'toggle',
                'symbols': [BuiltinSymbols.white, BuiltinSymbols.black]}]
         assert self.puzzle.editlayers == exp
+
+    def test_raw_grid_construction(self, puzzle_a):
+        raw_grid = self.puzzle.raw_grid
+        exp = "_  _  \nBK 1  \n"
+        assert str(raw_grid) == exp
+    
+    def test_json_dump_print_only(self, puzzle_a):
+        pprint.pp(self.puzzle.dump())
+        assert True

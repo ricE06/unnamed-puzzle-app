@@ -2,6 +2,7 @@
 This file contains Rules and SuperRules for nurikabe.
 """
 from puzzles.puzzle_core.rules import Rule, SuperRule
+from puzzles.puzzle_core.symbols import BuiltinSymbols
 # import BuiltinSymbols during __init__ to avoid circular import
 
 class Nurikabe(Rule):

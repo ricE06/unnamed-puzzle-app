@@ -5,7 +5,7 @@ A Symbol object has both an internal representation
 and an external representation displayed to the frontend.
 """
 
-from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import Lookup
+from puzzles.puzzle_core.builtin_rules.lookup import Lookup
 
 class Symbol():
     """
@@ -17,6 +17,7 @@ class Symbol():
         self.short_name = short_name
         self.file_name = file_name
         self.builtin_symbols[short_name] = self
+        self.type = self.__class__.__name__
 
     def dump(self):
         """

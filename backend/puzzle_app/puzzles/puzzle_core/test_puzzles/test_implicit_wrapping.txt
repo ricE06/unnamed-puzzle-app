@@ -15,7 +15,7 @@
 --Vertices
 -RectVertex % implicitly wrapped in a dict, not a 1-element list
 % encoding is not needed, defaults to full
-(data
+(@data
 _ _
 _ 1
 )
@@ -34,7 +34,7 @@ _ 1
 --Vertices
 -RectVertex % implicitly wrapped in a dict, not a 1-element list
 % encoding is not needed, defaults to 'full'
-(data
+(@data
 _ _
 _ 1
 )

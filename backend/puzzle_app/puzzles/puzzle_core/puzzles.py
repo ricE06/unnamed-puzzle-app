@@ -3,6 +3,7 @@ This file implements the general Puzzle object.
 This is what ends up being stored and sent to the frontend.
 """
 import json
+import copy
 from typing import Any, Optional
 from puzzles.puzzle_core.grids import Grid
 from puzzles.puzzle_core.rules import Rule
@@ -35,6 +36,7 @@ class Puzzle():
             that is part of the `symbols` key of the editlayer.
         """
         self.grid = grid
+        self.raw_grid = copy.deepcopy(grid)
         self.symbols = symbols
         self.editlayers = editlayers if editlayers is not None else []
         self.rules = rules

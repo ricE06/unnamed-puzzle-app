@@ -2,7 +2,7 @@
 This file implements classes for puzzle grids.
 """
 from abc import ABC, abstractmethod
-from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import Lookup
+from puzzles.puzzle_core.builtin_rules.lookup import Lookup
 from puzzles.puzzle_core.symbols import Symbol, BuiltinSymbols
 
 class GridConstructorError(Exception):
@@ -21,14 +21,18 @@ class Vertex():
             for a Solution object, they are either givens or 
             part of the solution.
     """
+    EMPTY_VERTEX_REPR = '_'
+
     def __init__(self) -> None:
         self.symbols = [] # list of Symbol objects
+        self.type = self.__class__.__name__
 
     def symbols_str(self) -> str:
         """
         Returns the short names of all of the symbols on the vertex,
         joined by the `-` character.
         """
+        if not self.symbols: return self.EMPTY_VERTEX_REPR
         return '-'.join(map(str, self.symbols))
 
     
@@ -68,6 +72,9 @@ class Grid(ABC): # abstract class
     """
     vertices = []
     display_sep = ' '
+
+    def __init__(self):
+        self.type = self.__class__.__name__
 
     @abstractmethod
     def adjacent(self, vertex_1, vertex_2) -> bool:
@@ -141,6 +148,7 @@ class RectGrid(Grid):
         self.height = height
         self.width = width
         self.vertices = self._gen_vertices()
+        Grid.__init__(self)
 
     def _gen_vertices(self):
         """
@@ -158,6 +166,10 @@ class RectGrid(Grid):
         return (diff_row, diff_col) in self.adj_differences
 
     def __str__(self) -> str:
+        """
+        Returns a string represenation of the grid. Spaces the vertices
+        evenly, with at least one space between vertices.
+        """
         sep_len = self.longest_symbol_len + 1
 
         out: str = ""
