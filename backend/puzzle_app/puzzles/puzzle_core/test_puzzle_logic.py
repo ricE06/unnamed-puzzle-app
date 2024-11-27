@@ -303,4 +303,12 @@ class Test_Puzzle_Construct():
         rule = rules[0]
         assert isinstance(rule, Nurikabe)
         assert rule.symbol == BuiltinSymbols.black
-        
+       
+    def test_grid_construction(self, puzzle_a):
+        exp = "WH   WH   \nWH   WH-1 \n"
+        assert str(self.puzzle.grid) == exp
+
+    def test_editlayer_construction(self, puzzle_a):
+        exp = [{'type': 'toggle',
+               'symbols': ['WH', 'BK']}]
+        assert self.puzzle.editlayers == exp

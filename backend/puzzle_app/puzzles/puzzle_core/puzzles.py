@@ -34,7 +34,7 @@ class Puzzle():
         self.rules = rules
         if default_symbol is not None:
             for vertex in grid:
-                vertex.symbols = [default_symbol]
+                vertex.symbols.insert(0, default_symbol)
 
     def __str__(self):
         nl = '\n'
