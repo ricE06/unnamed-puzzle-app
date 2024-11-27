@@ -305,10 +305,10 @@ class Test_Puzzle_Construct():
         assert rule.symbol == BuiltinSymbols.black
        
     def test_grid_construction(self, puzzle_a):
-        exp = "WH   WH   \nWH   WH-1 \n"
+        exp = "WH   WH   \nBK   WH-1 \n"
         assert str(self.puzzle.grid) == exp
 
     def test_editlayer_construction(self, puzzle_a):
         exp = [{'type': 'toggle',
-               'symbols': ['WH', 'BK']}]
+               'symbols': [BuiltinSymbols.white, BuiltinSymbols.black]}]
         assert self.puzzle.editlayers == exp

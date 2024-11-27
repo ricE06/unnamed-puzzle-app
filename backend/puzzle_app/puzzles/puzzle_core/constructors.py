@@ -66,6 +66,13 @@ class PuzzleConstructor():
             symbols.append(symbol)
           
         editlayers = data.get('editlayers', [])
+        # create Symbol objects within the editlayers
+        for layer in editlayers:
+            if 'symbols' not in layer:
+                raise ConstructorError('An editlayer requires the `symbols` key!')
+            if not layer['symbols']:
+                raise ConstructorError('At least one symbol required in `symbols` key of an editlayer!')
+            layer['symbols'] = list(map(BuiltinSymbols.get_symbol, layer['symbols']))
 
         # No support for default states right now, but it will automatically be
         # the first state in Symbols
@@ -79,6 +86,9 @@ class PuzzleConstructor():
     def load_txt_mult(data: str) -> list[Puzzle]:
         """
         Loads puzzles from a raw text file.
+        See the .txt files in the /test_puzzles/ directory
+        to reference how to format the files. Perhaps one day I'll add that
+        to the documentation here...
         """
         parsed = TextParser.parse_txt(data)
         # construct each and return as new list
@@ -97,6 +107,13 @@ class TextParser():
         pass
 
     class Parser(ABC):
+        """
+        Abstract class for parsing text. The `parse` method
+        is called on a nested token list, and uses a custom-defined
+        `parse_one` method for each subclass. `parse_one` deals
+        with a single token, at a time. If the token given is a list
+        of tokens, `parse` will call `parse_one` on each of them.
+        """
 
         def parse(self, tokens: str|list) -> Any:
             if isinstance(tokens, list):
@@ -110,11 +127,18 @@ class TextParser():
             raise NotImplementedError('Subclasses of Parser must implement `parse_one`!')
 
     class SelfParser(Parser):
+        """
+        Simplest possible parser - just returns the token raw.
+        """
 
         def parse_one(self, token: str|list[str]) -> str|list[str]:
             return token
 
     class BaseParser(Parser):
+        """
+        Similar to the self-parser, but will cast integers or floats
+        if possible.
+        """
 
         def number_or_other(self, token: str|list[str]) -> Any:
             if isinstance(token, list): return token
@@ -128,6 +152,13 @@ class TextParser():
             return self.number_or_other(token)
 
     class StateParser(Parser):
+        """
+        Special parser to parse symbols.
+
+        These will be passed as ONE continuous token, with the
+        `short_name` of each token separated by a delimiter
+        (see the DELIMITER constant, which should be `-`).
+        """
         DELIMITER = '-'
         EMPTY_TOKEN = '_'
 
@@ -138,6 +169,17 @@ class TextParser():
                          if token != self.EMPTY_TOKEN)
 
     class ListParser(Parser):
+        """
+        Special parser to parse lists.
+        To be clear, this is something that should OUTPUT a python list,
+        and I am not referring to the fact that tokens are stored in lists.
+
+        If `sub_parser` is given, each element will be processed by the sub_parser.
+        This allows us to create lists of lists or lists of dictionaries.
+
+        Could this technically be achieved with a self parser? Maybe. I don't
+        have the guts to refactor the code and try, though.
+        """
 
         def __init__(self, sub_parser):
             self.sub_parser = sub_parser
@@ -157,6 +199,20 @@ class TextParser():
             return self.sub_parser.parse(token)
 
     class DictParser(SelfParser):
+        """
+        Special parser to parse tokens and return a python dictionary.
+
+        The input format should be a series of 2-element tokens, where the
+        first subtoken will be the key and the second subtoken will be value.
+        The exception is if the token is an atomic token (i.e. just a string),
+        the parser will look for an *implicit key*. The prefix will be automatically
+        mapped to a built-in key, while the remainder of the string will be the value.
+        For instance, `-class_name` yields {'type': 'class_name'}.
+        See the IMPLICIT_KEYS class attribute below.
+
+        If `sub_parser` is given, the value will be processed by the sub_parser.
+        This allows us to create dictionaries of lists or dictionaries of other dictionaries.
+        """
         IMPLICIT_KEYS = {'-': 'type'}
 
         def __init__(self, sub_parser=None, custom_parsers=None):
@@ -280,7 +336,6 @@ class TextParser():
         """
         Parses part of the tokens list that describes a puzzle dictionary.
         Returns:
-            ptr: the pointer the parsing ended at and for the next parser to continue with
             out: a dictionary describing the Puzzle object (but not a Puzzle object), this
                 should be passed into the PuzzleConstructor
         """

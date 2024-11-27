@@ -27,8 +27,13 @@ class Puzzle():
     def __init__(self, grid: Grid, 
                  symbols: list[Symbol],
                  rules: list[Rule],
-                 editlayers: Optional[list[dict[str, Any]]] = None,
-                 default_symbol: Optional[Symbol] = None) -> None:
+                 editlayers: Optional[list[dict[str, Any]]] = None) -> None:
+        """
+        Creates a Puzzle object. Symbols are instantiated as follows:
+            for each editlayer, the FIRST symbol will be automatically
+            added to each cell unless there exists a symbol in the cell
+            that is part of the `symbols` key of the editlayer.
+        """
         self.grid = grid
         self.symbols = symbols
         self.editlayers = editlayers if editlayers is not None else []
@@ -36,10 +41,10 @@ class Puzzle():
 
         # initialize default values 
         for layer in self.editlayers:
-            if 'symbols' in layer:
-                default = BuiltinSymbols.get_symbol(layer['symbols'][0])
-                for vertex in grid:
-                    vertex.symbols.insert(0, default)
+            if 'symbols' not in layer: continue
+            for vertex in grid:
+                if list(set(vertex.symbols) & set(layer['symbols'])): continue
+                vertex.symbols.insert(0, layer['symbols'][0])
 
     def __str__(self):
         nl = '\n'

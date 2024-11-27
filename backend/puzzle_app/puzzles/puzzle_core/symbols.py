@@ -35,6 +35,13 @@ class Symbol():
         """
         return self.short_name == other.short_name
 
+    def __hash__(self):
+        """
+        Simple hash function. Warning: the number 1 and the string `1` are
+        treated as the same in this implementation.
+        """
+        return hash(str(self))
+
 
     def __str__(self):
         """
