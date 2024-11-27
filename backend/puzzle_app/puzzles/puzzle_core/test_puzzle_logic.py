@@ -12,6 +12,7 @@ Tests that should go here include:
 import pytest
 from typing import cast
 from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser, PuzzleConstructor
+from puzzles.puzzle_core.builtin_rules import Nurikabe
 
 PATH_TO_TEST_PUZZLES = 'puzzles/puzzle_core/test_puzzles/'
 
@@ -294,4 +295,12 @@ class Test_Puzzle_Construct():
     def test_symbol_construction(self, puzzle_a):
         symbols = self.puzzle.symbols
         assert symbols == [BuiltinSymbols.white, BuiltinSymbols.black, BuiltinSymbols.numeral(1)]
-
+    
+    def test_rule_construction(self, puzzle_a):
+        rules = self.puzzle.rules
+        assert isinstance(rules, list)
+        assert len(rules) == 1
+        rule = rules[0]
+        assert isinstance(rule, Nurikabe)
+        assert rule.symbol == BuiltinSymbols.black
+        
