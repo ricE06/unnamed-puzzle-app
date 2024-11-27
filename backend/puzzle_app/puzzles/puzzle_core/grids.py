@@ -3,8 +3,10 @@ This file implements classes for puzzle grids.
 """
 from abc import ABC, abstractmethod
 from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import Lookup
-from puzzles.puzzle_core.symbols import Symbol
-from puzzles.puzzle_core.constructors import ConstructorError
+from puzzles.puzzle_core.symbols import Symbol, BuiltinSymbols
+
+class GridConstructorError(Exception):
+    pass
 
 class Vertex(): 
     """
@@ -133,6 +135,7 @@ class RectGrid(Grid):
         vertices: list of RectVertex objects
     """
     adj_differences = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    DEFAULT_SYMBOL = '_'
 
     def __init__(self, height: int, width: int) -> None:
         self.height = height
@@ -193,14 +196,24 @@ class RectGrid(Grid):
     def init_vertices(self, vertex_data: dict) -> None:
         """
         Adds symbols to each vertex in `self.vertices`.
+        `vertex_data` is the value of the `vertices` attribute
+        in the full dictionary.
         """
         if 'data' not in vertex_data:
-            raise ConstructorError('Vertices require a `data` attribute!')
+            raise GridConstructorError('Vertices require a `data` attribute!')
+
         encoding = vertex_data.get('encoding', 'full')
         data = vertex_data['data']
+        default_symbol = vertex_data.get('default', self.DEFAULT_SYMBOL)
+        default_symbol = BuiltinSymbols.get_symbol(default_symbol)
         if encoding == 'full':
-            raise NotImplementedError('TODO: implement `init_vertices`')
-        raise ConstructorError(f'Invalid encoding scheme {encoding}')
+            # set every vertex to have the symbols
+            for idx, state_tup in enumerate(data):
+                if not state_tup:
+                    self.vertices[idx].symbols = [default_symbol]
+                self.vertices[idx].symbols = [BuiltinSymbols.get_symbol(name) for name in state_tup]
+        else:
+            raise GridConstructorError(f'Invalid encoding scheme {encoding}')
 
     def populate_by_coords(self, data: list[tuple[int, int, Symbol]]) -> None:
         """

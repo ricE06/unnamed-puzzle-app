@@ -5,6 +5,8 @@ A Symbol object has both an internal representation
 and an external representation displayed to the frontend.
 """
 
+from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import Lookup
+
 class Symbol():
     """
     Represents a symbol that is used to fill a grid.
@@ -23,11 +25,28 @@ class Symbol():
         """
         raise NotImplementedError('TODO: implement dump for Symbol class')
 
+    def __eq__(self, other):
+        """
+        Magic method to check for equality between Symbols, which is done
+        by comparing their short_names. This is because different Symbol
+        instances may be created at some point, such as during testing or
+        loading certain puzzles. Those should be treated as equal, and
+        test cases should pass.
+        """
+        return self.short_name == other.short_name
+
+
     def __str__(self):
         """
         String representation of the symbol for internal use.
         """
         return self.short_name
+
+    def __repr__(self):
+        """
+        Internal representation of the symbol for debugging.
+        """
+        return f'Symbol({self.short_name})'
         
 
 class Number(Symbol):
@@ -60,6 +79,11 @@ class BuiltinSymbols():
 
     @staticmethod
     def get_symbol(short_name: str) -> Symbol:
+        """
+        Returns the symbol object with the correct name.
+        Note any symbol object can be retrieved once
+        it is initiated `somewhere`.
+        """
         if short_name not in Symbol.builtin_symbols:
             raise ValueError(f'Symbol {short_name} is not a built-in symbol!')
         return Symbol.builtin_symbols[short_name]
@@ -77,4 +101,9 @@ class BuiltinSymbols():
         for val in range(cls._MAX_NUM):
             out.append(cls.numeral(val))
         return out
+
+
+# initialize all the number symbols to be looked up
+BuiltinSymbols.all_numerals()
+
 

@@ -2,6 +2,7 @@
 This file implements classes related to puzzle rules.
 """
 from abc import ABC, abstractmethod
+# from puzzles.puzzle_core.puzzles import Puzzle
 
 class Rule(ABC): # abstract class
     """

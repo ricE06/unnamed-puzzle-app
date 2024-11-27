@@ -8,7 +8,9 @@ This file implements helper functions to:
 
 from typing import Any
 from abc import ABC, abstractmethod
-from puzzles.puzzle_core import Puzzle
+from puzzles.puzzle_core import Puzzle, Grid, BuiltinSymbols
+from puzzles.puzzle_core.grids import GridLookup
+from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import RuleLookup
 
 TEXT_COMMENT_SYMBOL = '%'
 WHITESPACE = ' \t'
@@ -24,22 +26,74 @@ class PuzzleConstructor():
     """
     Contains helper functions to load puzzles.
     """
-   
+  
     @staticmethod
-    def construct_from_dict(data: dict[str, Any]) -> Puzzle:
-        raise NotImplementedError
+    def _all_except_type(inp_data: dict[str, Any], to_remove: str = 'type') -> dict[str, Any]:
+        """Returns a new dictionary but with the `type` entry removed."""
+        return {k: v for k, v in inp_data.items() if k != to_remove}
 
     @staticmethod
-    def load_txt(data: str) -> Puzzle:
+    def construct_from_dict(data: dict[str, Any]) -> Puzzle:
         """
-        Loads a puzzle from a raw text file.
+        Constructs a Puzzle object from the dictionary given from
+        a text parser. This dictionary may have the following keys:
+            'grid', 'vertices', 'rules', 'editlayers', 'symbols'
         """
-        raise NotImplementedError
+        print(data)
+        # create Grid object
+        if 'grid' not in data:
+            raise ConstructorError('Input data needs a `grid` key!')
+        grid_data = data['grid']
+        grid_cls = GridLookup.get_cls(grid_data['type'])
+        # put all other arguments except for type in the initiator as kwargs
+        grid: Grid = grid_cls(**PuzzleConstructor._all_except_type(grid_data))
+
+        # instantiate all the vertices on the grid, we don't create
+        # the vertices in this function
+        grid.init_vertices(vertex_data=data.get('vertices', {}))
+
+        # create Rule objects
+        rules = []
+        for rule_entry in data.get('rules', []):
+            rule_cls = RuleLookup.get_cls(rule_entry['type'])
+            rule = rule_cls(**PuzzleConstructor._all_except_type(rule_entry))
+            rules.append(rule)
+
+        # create Symbol objects
+        symbols = []
+        for symbol_name in data.get('symbols', []):
+            # no initiation needed, SymbolLookup returns the symbol instance
+            symbol = BuiltinSymbols.get_symbol(symbol_name)
+            symbols.append(symbol)
+          
+        # I'm not gonna lie, I'm not sure if we actually need to store
+        # editlayers in the backend Puzzles
+        # But we will initiate with them nonetheless
+        # If you read this in the future, you can probably get rid of this
+        # or change as necessary (although it may break old test cases...?)
+        editlayers = data.get('editlayers', [])
+
+        # No support for default states right now, but it will automatically be
+        # the first state in Symbols
+        default_symbol = symbols[0] if symbols else BuiltinSymbols.empty
+        # create Puzzle object
+        main_puzzle = Puzzle(grid=grid, rules=rules, symbols=symbols, 
+                             editlayers=editlayers, default_symbol=default_symbol)
+        return main_puzzle
+
+    @staticmethod
+    def load_txt_mult(data: str) -> list[Puzzle]:
+        """
+        Loads puzzles from a raw text file.
+        """
+        parsed = TextParser.parse_txt(data)
+        # construct each and return as new list
+        return list(map(PuzzleConstructor.construct_from_dict, parsed))
 
     @staticmethod
     def load_json(data: dict) -> Puzzle:
         """
-        Loads a puzzle from a raw json file.
+        Loads a single puzzle from a raw json file.
         """
         raise NotImplementedError
 

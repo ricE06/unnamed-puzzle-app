@@ -11,7 +11,7 @@ Tests that should go here include:
 """
 import pytest
 from typing import cast
-from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser
+from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser, PuzzleConstructor
 
 PATH_TO_TEST_PUZZLES = 'puzzles/puzzle_core/test_puzzles/'
 
@@ -30,7 +30,7 @@ class Test_Puzzles_Debug():
     def example_tiny(self):
         grid = RectGrid(3, 2)
         white = BuiltinSymbols.white
-        self.tiny = Puzzle(grid, [white], [], [white], white)
+        self.tiny = Puzzle(grid=grid, symbols=[white], rules=[], editlayers=[], default_symbol=white)
 
     def test_print_puzzle(self, example_tiny):
         exp = "\nWH WH \nWH WH \nWH WH \n"
@@ -277,15 +277,21 @@ class Test_Puzzle_Construct():
     Tests the constructor for both text and json formats.
     """
 
-    def test_text_construction_well_formed(self):
-        text = load_from_file('test_constructor.txt')
-        output = TextParser.parse_txt(text)
-        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'},],
-                 'grid': {'type': 'RectGrid',
-                          'height': 2, 'width': 2},
-                 'vertices': {'data': [tuple(), tuple(), tuple(), ('1',)],
-                              'type': 'RectVertex',},
-               'symbols': ['WH', 'BK', '1'],
-               'editlayers': [{'type': 'toggle', 'symbols': ['WH', 'BK']}]}
-        assert output[1] == exp
+    @pytest.fixture
+    def well_formed(self):
+        self.txt = load_from_file('test_constructor.txt')
+
+    @pytest.fixture
+    def puzzle_a(self):
+        txt = load_from_file('test_constructor.txt')
+        self.puzzle = PuzzleConstructor.load_txt_mult(txt)[0]
+
+    def test_text_construction_simple(self, well_formed):
+        puzzles = PuzzleConstructor.load_txt_mult(self.txt)
+        assert isinstance(puzzles, list)
+        assert len(puzzles) == 1
+
+    def test_symbol_construction(self, puzzle_a):
+        symbols = self.puzzle.symbols
+        assert symbols == [BuiltinSymbols.white, BuiltinSymbols.black, BuiltinSymbols.numeral(1)]
 
