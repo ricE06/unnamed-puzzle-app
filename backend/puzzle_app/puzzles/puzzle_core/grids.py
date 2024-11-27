@@ -208,10 +208,10 @@ class RectGrid(Grid):
         default_symbol = BuiltinSymbols.get_symbol(default_symbol)
         if encoding == 'full':
             # set every vertex to have the symbols
-            for idx, state_tup in enumerate(data):
+            for vertex, state_tup in zip(self, data):
                 if not state_tup:
-                    self.vertices[idx].symbols = [default_symbol]
-                self.vertices[idx].symbols = [BuiltinSymbols.get_symbol(name) for name in state_tup]
+                    vertex.symbols = [default_symbol]
+                vertex.symbols = [BuiltinSymbols.get_symbol(name) for name in state_tup]
         else:
             raise GridConstructorError(f'Invalid encoding scheme {encoding}')
 

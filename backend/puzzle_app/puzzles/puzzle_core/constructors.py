@@ -39,7 +39,6 @@ class PuzzleConstructor():
         a text parser. This dictionary may have the following keys:
             'grid', 'vertices', 'rules', 'editlayers', 'symbols'
         """
-        print(data)
         # create Grid object
         if 'grid' not in data:
             raise ConstructorError('Input data needs a `grid` key!')
@@ -66,19 +65,14 @@ class PuzzleConstructor():
             symbol = BuiltinSymbols.get_symbol(symbol_name)
             symbols.append(symbol)
           
-        # I'm not gonna lie, I'm not sure if we actually need to store
-        # editlayers in the backend Puzzles
-        # But we will initiate with them nonetheless
-        # If you read this in the future, you can probably get rid of this
-        # or change as necessary (although it may break old test cases...?)
         editlayers = data.get('editlayers', [])
 
         # No support for default states right now, but it will automatically be
         # the first state in Symbols
-        default_symbol = symbols[0] if symbols else BuiltinSymbols.empty
+        # default_symbol = symbols[0] if symbols else BuiltinSymbols.empty
         # create Puzzle object
         main_puzzle = Puzzle(grid=grid, rules=rules, symbols=symbols, 
-                             editlayers=editlayers, default_symbol=default_symbol)
+                             editlayers=editlayers)
         return main_puzzle
 
     @staticmethod
@@ -105,7 +99,6 @@ class TextParser():
     class Parser(ABC):
 
         def parse(self, tokens: str|list) -> Any:
-            print(f'{tokens=} in `parse`')
             if isinstance(tokens, list):
                 if len(tokens) == 0:
                     return []
@@ -151,7 +144,6 @@ class TextParser():
 
         def _parse_depreciated(self, tokens: str|list) -> Any:
             """This function serves no purpose as of now."""
-            print(f'{tokens=} in ListParser `parse`')
             if isinstance(tokens, list) and len(tokens) == 0:
                 return []
             if (isinstance(tokens, str) 
@@ -173,14 +165,12 @@ class TextParser():
             self.out_dict = {}
 
         def parse(self, tokens: str|list) -> Any:
-            print(f'{tokens=} in DictParser `parse`')
             super().parse(tokens)
             copy = self.out_dict # careful, not a shallow copy
             self.out_dict = {}
             return copy
 
         def parse_one(self, token: str|list) -> Any:
-            print(f'{token=} in `parse_one`')
             if isinstance(token, str):
                 if token[0] not in self.IMPLICIT_KEYS:
                     raise TextParser.TextParsingError(f'No implicit key found for {token}!')

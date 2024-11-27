@@ -31,7 +31,7 @@ class Test_Puzzles_Debug():
     def example_tiny(self):
         grid = RectGrid(3, 2)
         white = BuiltinSymbols.white
-        self.tiny = Puzzle(grid=grid, symbols=[white], rules=[], editlayers=[], default_symbol=white)
+        self.tiny = Puzzle(grid=grid, symbols=[white], rules=[], editlayers=[{'symbols': ['WH']}])
 
     def test_print_puzzle(self, example_tiny):
         exp = "\nWH WH \nWH WH \nWH WH \n"
@@ -61,7 +61,7 @@ class Test_Puzzles_Debug():
     def test_numeric_symbols(self):
         grid = RectGrid(3, 2)
         all_nums = BuiltinSymbols.all_numerals()
-        puz = Puzzle(grid, all_nums, [], all_nums, BuiltinSymbols.numeral(0))
+        puz = Puzzle(grid, all_nums, [], [{'symbols': ['0']}])
         exp = "\n0 0 \n0 0 \n0 0 \n"
         assert str(puz) == exp
         grid.replace_symbols(0, 1, [BuiltinSymbols.numeral(4)])

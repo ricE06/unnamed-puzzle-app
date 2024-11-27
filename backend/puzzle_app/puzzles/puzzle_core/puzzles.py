@@ -14,6 +14,7 @@ class Puzzle():
 
     Instance attributes:
         grid: the Grid object the puzzle is played on
+        symbols: list of all symbols in the puzzle
         rules: the Rule objects that the puzzle must obey
         editlayers: a list of dictionaries describing what states
             can the user edit to solve the puzzle
@@ -32,9 +33,13 @@ class Puzzle():
         self.symbols = symbols
         self.editlayers = editlayers if editlayers is not None else []
         self.rules = rules
-        if default_symbol is not None:
-            for vertex in grid:
-                vertex.symbols.insert(0, default_symbol)
+
+        # initialize default values 
+        for layer in self.editlayers:
+            if 'symbols' in layer:
+                default = BuiltinSymbols.get_symbol(layer['symbols'][0])
+                for vertex in grid:
+                    vertex.symbols.insert(0, default)
 
     def __str__(self):
         nl = '\n'
