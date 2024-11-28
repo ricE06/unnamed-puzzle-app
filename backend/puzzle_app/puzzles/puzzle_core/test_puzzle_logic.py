@@ -15,6 +15,8 @@ from typing import cast
 from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser, PuzzleConstructor
 from puzzles.puzzle_core.builtin_rules import Nurikabe
 
+# we run `pytest` from the django base directory (the one with `manage.py` in it)
+# this allows us to call `django.ini` and actually import everything correctly
 PATH_TO_TEST_PUZZLES = 'puzzles/puzzle_core/test_puzzles/'
 
 def load_from_file(base_file_name):
