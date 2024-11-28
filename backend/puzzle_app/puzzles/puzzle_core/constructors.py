@@ -6,11 +6,21 @@ This file implements helper functions to:
     create Solution instances
 """
 
+import json
+import inspect
 from typing import Any
 from abc import ABC, abstractmethod
 from puzzles.puzzle_core import Puzzle, Grid, BuiltinSymbols
 from puzzles.puzzle_core.grids import GridLookup
 from puzzles.puzzle_core.builtin_rules.LOOKUP_TABLE import RuleLookup
+
+# this import is required for JSON constructor
+# if this causes circular imports in the future, I am so sorry.
+# Perhaps take a break and go for a walk.
+# Also, how long has it been since you last touched this code? 
+# Did this app even come to fruition?
+# How's that UROP going?
+from puzzles.puzzle_core import *
 
 TEXT_COMMENT_SYMBOL = '%'
 WHITESPACE = ' \t'
@@ -18,6 +28,9 @@ BRACES = '()'
 LEFT_BRACE = '(' #)
 RIGHT_BRACE = ')' 
 
+# this is necessary for JSON constructor to make
+# instances on the fly given a class name as a string
+ALL_GLOBALS = globals()
 
 class ConstructorError(Exception):
     pass
@@ -26,6 +39,7 @@ class PuzzleConstructor():
     """
     Contains helper functions to load puzzles.
     """
+    globals = {k: v for k, v in ALL_GLOBALS.items() if inspect.isclass(v)}
   
     @staticmethod
     def _all_except_type(inp_data: dict[str, Any], to_remove: str = 'type') -> dict[str, Any]:
@@ -94,12 +108,35 @@ class PuzzleConstructor():
         # construct each and return as new list
         return list(map(PuzzleConstructor.construct_from_dict, parsed))
 
-    @staticmethod
-    def load_json(data: dict) -> Puzzle:
+    @classmethod
+    def load_json(cls, data: str) -> Puzzle:
         """
         Loads a single puzzle from a raw json file.
         """
-        raise NotImplementedError
+        def instantiate(data):
+            """
+            Recursively creates instances using the 
+            `type` key in the dictionary. If `data` is a list,
+            it will apply itself to each element in the list.
+            If `state_name` exists, it will assume it is a symbol
+            rather than a class.
+            """
+            if isinstance(data, list):
+                return list(map(instantiate, data))
+            if isinstance(data, dict):
+                if 'type' in data:
+                    kwargs = {k: instantiate(v) for k, v in cls._all_except_type(data).items()}
+                    return cls.globals[data['type']](**kwargs)
+                if 'short_name' in data: # do we need this? idk
+                    return BuiltinSymbols.get_symbol(data['short_name'])
+                # this is for an editlayer
+                return {k: instantiate(v) for k, v in data.items()}
+            # neither list or dict, must be a literal
+            return data
+
+        loaded = json.loads(data)
+        kwargs = {k: instantiate(data) for k, data in loaded.items()}
+        return Puzzle(**kwargs)
 
 class TextParser():
 

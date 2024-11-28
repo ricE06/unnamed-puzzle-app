@@ -10,6 +10,7 @@ Tests that should go here include:
 """
 import pytest
 import pprint
+import json
 from typing import cast
 from puzzles.puzzle_core import Puzzle, RectGrid, BuiltinSymbols, TextParser, PuzzleConstructor
 from puzzles.puzzle_core.builtin_rules import Nurikabe
@@ -61,7 +62,7 @@ class Test_Puzzles_Debug():
     def test_numeric_symbols(self):
         grid = RectGrid(3, 2)
         all_nums = BuiltinSymbols.all_numerals()
-        puz = Puzzle(grid, all_nums, [], [{'symbols': ['0']}])
+        puz = Puzzle(grid, all_nums, [], editlayers=[{'symbols': ['0']}])
         exp = "\n0 0 \n0 0 \n0 0 \n"
         assert str(puz) == exp
         grid.replace_symbols(0, 1, [BuiltinSymbols.numeral(4)])
@@ -309,7 +310,7 @@ class Test_Puzzle_Construct():
         assert str(self.puzzle.grid) == exp
 
     def test_editlayer_construction(self, puzzle_a):
-        exp = [{'type': 'toggle',
+        exp = [{'mode': 'toggle',
                'symbols': [BuiltinSymbols.white, BuiltinSymbols.black]}]
         assert self.puzzle.editlayers == exp
 
@@ -321,3 +322,40 @@ class Test_Puzzle_Construct():
     def test_json_dump_print_only(self, puzzle_a):
         pprint.pp(self.puzzle.dump())
         assert True
+
+    def test_json_load_print_only(self, puzzle_a, well_formed):
+        dumped = self.puzzle.dump()
+        pprint.pp(json.loads(dumped))
+        pprint.pp(TextParser.parse_txt(self.txt))
+        assert True
+
+    def test_json_symbol_construction(self, puzzle_a):
+        dumped = self.puzzle.dump()
+        reloaded = PuzzleConstructor.load_json(dumped)
+        assert self.puzzle.symbols == reloaded.symbols
+
+    def test_json_rule_construction(self, puzzle_a):
+        dumped = self.puzzle.dump()
+        reloaded = PuzzleConstructor.load_json(dumped)
+        rules = reloaded.rules
+        assert isinstance(rules, list)
+        assert len(rules) == len(self.puzzle.rules)
+        rule = rules[0]
+        assert rule.type == self.puzzle.rules[0].type
+        assert rule.symbol == self.puzzle.rules[0].symbol
+
+    def test_json_grid_construction(self, puzzle_a):
+        dumped = self.puzzle.dump()
+        reloaded = PuzzleConstructor.load_json(dumped)
+        assert str(self.puzzle.grid) == str(reloaded.grid)
+
+    def test_json_raw_grid_construction(self, puzzle_a):
+        dumped = self.puzzle.dump()
+        reloaded = PuzzleConstructor.load_json(dumped)
+        assert str(self.puzzle.raw_grid) == str(reloaded.raw_grid)
+
+    def test_json_editlayer_construction(self, puzzle_a):
+        dumped = self.puzzle.dump()
+        reloaded = PuzzleConstructor.load_json(dumped)
+        assert self.puzzle.editlayers == reloaded.editlayers
+

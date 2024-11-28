@@ -63,7 +63,7 @@ class Number(Symbol):
     """
     file_prefix = "Num"
 
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: int, **kwargs) -> None:
         self.value = value
         Symbol.__init__(self, str(value), f'{self.file_prefix}_{value}')
 
@@ -73,7 +73,7 @@ class Colored(Symbol):
     """
     file_prefix = "Color"
 
-    def __init__(self, short_name: str) -> None:
+    def __init__(self, short_name: str, **kwargs) -> None:
         Symbol.__init__(self, short_name, f'{self.file_prefix}_{short_name}')
 
 class BuiltinSymbols():

@@ -2,6 +2,7 @@
 This file implements classes for puzzle grids.
 """
 from abc import ABC, abstractmethod
+from typing import Optional
 from puzzles.puzzle_core.builtin_rules.lookup import Lookup
 from puzzles.puzzle_core.symbols import Symbol, BuiltinSymbols
 
@@ -23,8 +24,8 @@ class Vertex():
     """
     EMPTY_VERTEX_REPR = '_'
 
-    def __init__(self) -> None:
-        self.symbols = [] # list of Symbol objects
+    def __init__(self, symbols: Optional[list[Symbol]] = None) -> None:
+        self.symbols = [] if symbols is None else symbols # list of Symbol objects
         self.type = self.__class__.__name__
 
     def symbols_str(self) -> str:
@@ -46,10 +47,10 @@ class RectVertex(Vertex):
         col_idx: the column coordinate (0 is left)
     """
 
-    def __init__(self, row_idx: int, col_idx: int) -> None:
+    def __init__(self, row_idx: int, col_idx: int, symbols: Optional[list[Symbol]] = None) -> None:
         self.row_idx = row_idx
         self.col_idx = col_idx
-        Vertex.__init__(self)
+        Vertex.__init__(self, symbols)
 
     @property
     def coords(self) -> tuple[int, int]:
@@ -144,10 +145,10 @@ class RectGrid(Grid):
     adj_differences = [(1, 0), (-1, 0), (0, 1), (0, -1)]
     DEFAULT_SYMBOL = '_'
 
-    def __init__(self, height: int, width: int) -> None:
+    def __init__(self, height: int, width: int, vertices: Optional[list[Vertex]] = None) -> None:
         self.height = height
         self.width = width
-        self.vertices = self._gen_vertices()
+        self.vertices = self._gen_vertices() if vertices is None else vertices
         Grid.__init__(self)
 
     def _gen_vertices(self):

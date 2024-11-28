@@ -28,6 +28,7 @@ class Puzzle():
     def __init__(self, grid: Grid, 
                  symbols: list[Symbol],
                  rules: list[Rule],
+                 raw_grid: Optional[Grid] = None,
                  editlayers: Optional[list[dict[str, Any]]] = None) -> None:
         """
         Creates a Puzzle object. Symbols are instantiated as follows:
@@ -36,7 +37,7 @@ class Puzzle():
             that is part of the `symbols` key of the editlayer.
         """
         self.grid = grid
-        self.raw_grid = copy.deepcopy(grid)
+        self.raw_grid = copy.deepcopy(grid) if raw_grid is None else raw_grid
         self.symbols = symbols
         self.editlayers = editlayers if editlayers is not None else []
         self.rules = rules

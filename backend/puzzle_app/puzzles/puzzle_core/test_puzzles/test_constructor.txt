@@ -19,7 +19,7 @@ BK 1
 --Symbols
 WH BK 1 % implicitly wrapped in a 3-element list
 --EditLayers
-(-toggle (symbols WH BK)) % implicitly wrapped in a 1-element list containing a dict
+((mode toggle) (symbols WH BK)) % implicitly wrapped in a 1-element list containing a dict
 
 
 ) % end puzzle
