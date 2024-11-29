@@ -343,7 +343,7 @@ class Test_Puzzle_Construct():
         assert isinstance(rules, list)
         assert len(rules) == len(self.puzzle.rules)
         rule = rules[0]
-        assert rule.type == self.puzzle.rules[0].type
+        assert rule.type == self.puzzle.rules[0].type == 'Nurikabe'
         assert rule.symbol == self.puzzle.rules[0].symbol
 
     def test_json_grid_construction(self, puzzle_a):
