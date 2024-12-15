@@ -1,0 +1,97 @@
+% !PPFFFFFPPPPF
+
+( % PASS
+--Rules
+(-RegionSizesEqualNumbers (allowed_symbol !X))
+
+--Grid (-RectGrid (height 2) (width 2))
+--Vertices (-RectVertex (encoding full) (@data
+3-X X
+_ X
+))
+
+) 
+
+( % PASS
+
+--Vertices -RectVertex (@data
+1-X _
+_ 1-X
+))
+
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+X _
+_ X
+))
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+2-X X
+X   X
+))
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+0-X _
+_ _
+))
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+4-X X
+X 4-X
+))
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+3-X X
+X 4-X
+))
+
+( % PASS
+
+--Vertices -RectVertex (@data
+0 _
+_ _
+))
+
+( % PASS
+
+--Grid (-RectGrid (height 3) (width 4))
+--Vertices -RectVertex (@data
+2-X X _ _
+_   _ X 4-X
+_   X X _
+))
+
+( % PASS
+
+--Vertices -RectVertex (@data
+12-X X X X
+X    X X X
+X    X X X
+))
+
+( % PASS
+
+--Vertices -RectVertex (@data
+_ X   X _
+X 6-X X _
+_ X   _ 1-X
+))
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+_ _ X _
+_ 9 X X-7
+X X X X
+))
+

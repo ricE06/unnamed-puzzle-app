@@ -1,0 +1,62 @@
+% !PPFFPP
+
+( % PASS
+--Rules
+(-SingleConnectedRegion (symbol !X))
+
+--Grid (-RectGrid (height 3) (width 3))
+--Vertices (-RectVertex (encoding full) (@data
+        X _ X 
+        X X X 
+        X _ _ 
+))
+
+) 
+
+( % PASS
+
+--Vertices (-RectVertex (encoding full) (@data
+	X _ X
+    X _ X
+    X X X
+))
+)
+
+( % FAIL
+
+--Vertices (-RectVertex (encoding full) (@data
+   X _ X    
+   X _ X    
+   X _ X    
+))
+)
+
+( % FAIL
+
+--Vertices -RectVertex (@data
+   _ X X    
+   X _ X    
+   _ X _    
+)
+)
+
+( % PASS
+
+--Vertices -RectVertex (@data
+_ _ _
+_ _ X
+_ _ _
+)
+)
+
+
+( % PASS
+
+--Vertices (-RectVertex (encoding full) (@data
+_ _ _
+_ _ _
+_ _ _
+))
+)
+
+

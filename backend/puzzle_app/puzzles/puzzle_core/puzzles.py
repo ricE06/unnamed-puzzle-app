@@ -24,6 +24,7 @@ class Puzzle():
         __repr__: display the puzzle grid for debugging
         dump: get a JSON representation of the puzzle
     """
+    error_msg = "" # what gets displayed if a check fails
 
     def __init__(self, grid: Grid, 
                  symbols: list[Symbol],
@@ -35,6 +36,7 @@ class Puzzle():
             for each editlayer, the FIRST symbol will be automatically
             added to each cell unless there exists a symbol in the cell
             that is part of the `symbols` key of the editlayer.
+            The original grid is stored in `raw_grid`.
         """
         self.grid = grid
         self.raw_grid = copy.deepcopy(grid) if raw_grid is None else raw_grid
@@ -62,4 +64,16 @@ class Puzzle():
         pass to the frontend and database.
         """
         return json.dumps(self, default=lambda x: x.__dict__)
+
+    def check(self) -> bool:
+        """
+        Checks if the puzzle satisfies all of its rules in `self.rules`.
+        Returns True if and only if each `.check()` method for all of the puzzle's
+        rules are also True, False otherwise.
+        """
+        for rule in self.rules:
+            if not rule.check(self):
+                self.error_msg = rule.error_msg 
+                return False
+        return True
 

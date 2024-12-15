@@ -40,8 +40,12 @@ class TestPuzzleModel():
         data = {'name': 'empty_puzzle'}
         request = self.factory.get(self.get_url, data)
         response = self.view(request)
-        content = json.load(response.content.decode('utf-8'))
-        print(content)
+        content = response.content
+        decoded = content.decode('utf-8')
+        # content = json.load(response.content)
+        assert decoded == '{"name": "empty_puzzle", "display_name": "Test Puzzle!", "active": true}'
+
+
 
 
 

@@ -1,0 +1,43 @@
+% !PPFF
+% These puzzles test the NoTwoByTwoSquare rule.
+
+( % PASS
+--Rules
+(-NoTwoByTwoSquare (symbol !X))
+
+--Grid (-RectGrid (height 3) (width 3))
+--Vertices (-RectVertex (encoding full) (@data
+        X _ X 
+        X X _ 
+        X _ _ 
+))
+
+) 
+
+( % PASS
+
+--Vertices (-RectVertex (encoding full) (@data
+	X X X
+    X _ X
+    X X X
+))
+)
+
+( % FAIL
+
+--Vertices (-RectVertex (encoding full) (@data
+   X X _    
+   X X _    
+   _ X X    
+))
+)
+
+( % FAIL
+
+--Vertices (-RectVertex (encoding full) (@data
+_ _ _
+X X X
+X X X
+))
+)
+

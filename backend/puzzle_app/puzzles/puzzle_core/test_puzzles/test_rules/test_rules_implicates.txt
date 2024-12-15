@@ -1,0 +1,37 @@
+% !PPPF
+
+( 
+--Rules
+(-Implicates (subset_symbols !x !y) (superset_symbols !X !Y))
+
+--Grid (-RectGrid (height 2) (width 2))
+--Vertices -RectVertex (@data
+X x-X
+Y x-Y
+)
+) 
+
+( 
+
+--Vertices -RectVertex (@data
+_ y-X-Y
+Y-y _
+)
+)
+
+(
+
+--Vertices -RectVertex (@data
+_ _
+_ _
+)
+)
+
+(
+
+--Vertices -RectVertex (@data
+X x
+_ x-Y
+)
+)
+

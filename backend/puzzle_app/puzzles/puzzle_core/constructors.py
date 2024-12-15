@@ -8,6 +8,7 @@ This file implements helper functions to:
 
 import json
 import inspect
+import copy
 from typing import Any
 from abc import ABC, abstractmethod
 from puzzles.puzzle_core import Puzzle, Grid, BuiltinSymbols
@@ -127,7 +128,7 @@ class PuzzleConstructor():
                 if 'type' in data:
                     kwargs = {k: instantiate(v) for k, v in cls._all_except_type(data).items()}
                     return cls.globals[data['type']](**kwargs)
-                if 'short_name' in data: # do we need this? idk
+                if 'short_name' in data: 
                     return BuiltinSymbols.get_symbol(data['short_name'])
                 # this is for an editlayer
                 return {k: instantiate(v) for k, v in data.items()}
@@ -174,11 +175,16 @@ class TextParser():
     class BaseParser(Parser):
         """
         Similar to the self-parser, but will cast integers or floats
-        if possible.
+        if possible. 
+        If a string begins with `!`, it will be converted to the
+        corresponding built-in symbol.
         """
+        SYMBOL_INDICATOR = "!"
 
         def number_or_other(self, token: str|list[str]) -> Any:
             if isinstance(token, list): return token
+            if token[0] == self.SYMBOL_INDICATOR:
+                return BuiltinSymbols.get_symbol(token[1:])
             try: return int(token)
             except ValueError: pass
             try: return float(token)
@@ -253,7 +259,7 @@ class TextParser():
         IMPLICIT_KEYS = {'-': 'type'}
 
         def __init__(self, sub_parser=None, custom_parsers=None):
-            self.sub_parser = TextParser.SelfParser() if sub_parser is None else sub_parser
+            self.sub_parser = TextParser.BaseParser() if sub_parser is None else sub_parser
             self.custom_parsers = {} if custom_parsers is None else custom_parsers
             self.out_dict = {}
 
@@ -357,7 +363,12 @@ class TextParser():
         Parses a text file. Returns a list of puzzle dictionaries.
         """
         tokens = cls.nested_tokens_txt(inp_txt)
-        return [cls._parse_puzzle(puzz) for puzz in tokens]
+        last = {}
+        out = []
+        for puzz in tokens:
+            last = cls._parse_puzzle(puzz, last)
+            out.append(last)
+        return out
 
     SUBPUZZLE_FLAG_PREFIX = '--'
     SUBPUZZLE_FLAGS = {'--rules': {'parser': ListParser(DictParser(BaseParser())), 
@@ -375,14 +386,18 @@ class TextParser():
                                         'smart_wrap': False}}
 
     @classmethod
-    def _parse_puzzle(cls, tokens: list[list|str]) -> dict[str, Any]:
+    def _parse_puzzle(cls, tokens: list[list|str], prev_data: dict) -> dict[str, Any]:
         """
         Parses part of the tokens list that describes a puzzle dictionary.
         Returns:
             out: a dictionary describing the Puzzle object (but not a Puzzle object), this
                 should be passed into the PuzzleConstructor
+            prev_data: a dictionary that was the output of this function for the *previous*
+                puzzle. If this is the first puzzle, it should be empty.
+                Essentially, if keys are not explicitly provided, then it will retain
+                the same information as the puzzles before it.
         """
-        out = {}
+        out = copy.deepcopy(prev_data)
         def add_attr_smart_wrapping(flag: str, expr: list|str) -> None:
             """Adds expr to out. Wraps it in a list if needed."""
             # if the wrapper is explicitly given, no need to re-wrap in a new list

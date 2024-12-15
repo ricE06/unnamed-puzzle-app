@@ -59,13 +59,17 @@ class RectVertex(Vertex):
         """
         return (self.row_idx, self.col_idx)
 
-
+    def __hash__(self):
+        return hash(self.coords)
 
 class Grid(ABC): # abstract class
     """
     This is an abstract class for a puzzle grid. All grids are
     treated as graphs internally, although certain shapes will allow for
     coordinate systems to make life easier.
+    
+    Attributes:
+        vertices: (list[Vertex]) list of each vertex in the grid
 
     Methods:
         adjacent(self, vertex_1, vertex_2): checks if the two
@@ -242,6 +246,45 @@ class RectGrid(Grid):
         Returns: none
         """
         raise NotImplementedError
+    
+    def get_adjacencies(self, vertex: RectVertex) -> list[RectVertex]:
+        """
+        Given a RectVertex, return all of the RectVertex objects that are
+        adjacent to it (diagonals NOT included).
+        """
+        out = []
+        for dir in self.adj_differences:
+            new_x = vertex.coords[0] + dir[0]
+            new_y = vertex.coords[1] + dir[1]
+            if 0 <= new_x < self.width and 0 <= new_y < self.height:
+                out.append(self.get_vertex(new_y, new_x)) # new_y is row, new_x is col
+        return out
+
+    def region(self, seed: RectVertex, symbol: Symbol) -> list[RectVertex]:
+        """
+        Given a starting `seed` RectVertex, returns the connected region of vertices all
+        containing `symbol` containing `seed`.
+        """
+        if symbol not in seed.symbols:
+            return []
+        # begin bfs
+        visited = {seed}
+        queue = [seed]
+        qidx = 0 # we don't remove from the start, but keep track of where we are
+
+        while qidx < len(queue):
+            cur_vertex = queue[qidx]
+            for new_vertex in self.get_adjacencies(cur_vertex):
+                if new_vertex in visited:
+                    continue
+                visited.add(new_vertex)
+                if symbol not in new_vertex.symbols:
+                    continue
+                queue.append(new_vertex)
+            qidx += 1
+
+        return queue
+
 
 class VertexLookup(Lookup):
     TABLE = {'rectvertex': RectVertex}

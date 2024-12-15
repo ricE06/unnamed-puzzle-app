@@ -11,17 +11,23 @@ class Rule(ABC): # abstract class
     Class methods:
         check(solution): returns True if
             solution satisfies the constraints described
-            by the Rule object, False otherwise
+            by the Rule object, False otherwise. If False,
+            this method should write to `self.error_msg` with
+            an informative error message (such as where the mistake occured).
+            
     """
     description = "Unknown rule."
 
     def __init__(self):
         self.type = self.__class__.__name__
+        self.error_msg = f"Something wrong happened, but this rule {self.type} doesn't have an error\
+message implemented."
 
     @abstractmethod
     def check(self, solution) -> bool:
         """
         Returns True if the solution satisfies the rule, False otherwise.
+        `solution` must be of type Puzzle.
         """
         raise NotImplementedError("Subclasses of Rule must implement a `check` method!")
 
@@ -37,10 +43,14 @@ class SuperRule(Rule):
 
     def __init__(self, subrules: list[Rule]) -> None:
         self.subrules = subrules
+        Rule.__init__(self)
 
     def check(self, solution) -> bool:
         """
         Returns True if the solution satisfies the superrule, False otherwise.
         """
-        return min(True, *(rule.check(solution) for rule in self.subrules))
+        valid = min(True, *(rule.check(solution) for rule in self.subrules))
+        self.error_msg = "\n".join(list(subrule.error_msg for subrule in self.subrules))
+        return valid
+            
 

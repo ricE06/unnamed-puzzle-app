@@ -26,6 +26,7 @@ class PuzzleRetrieve(APIView):
         name = request.query_params.get("name")
         puzzle = self._get_object(name=name)
         serializer = self.serializer_class(puzzle)
+        assert isinstance(serializer.data, dict)
         return JsonResponse(serializer.data, status=status.HTTP_200_OK)
 
 

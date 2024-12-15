@@ -85,6 +85,12 @@ class BuiltinSymbols():
     white = Colored('WH')
     black = Colored('BK')
 
+    # these symbols r for the test cases
+    test_X = Colored('X')
+    test_x = Colored('x')
+    test_Y = Colored('Y')
+    test_y = Colored('y')
+
     @staticmethod
     def get_symbol(short_name: str) -> Symbol:
         """

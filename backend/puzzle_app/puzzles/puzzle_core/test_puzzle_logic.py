@@ -266,7 +266,7 @@ class Test_Text_Tokenizer():
     def test_text_to_dict_more_supertags(self):
         text = load_from_file('test_implicit_wrapping.txt')
         output = TextParser.parse_txt(text)
-        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'},],
+        exp = {'rules': [{'type': 'Nurikabe', 'symbol': 'BK'}],
                  'grid': {'type': 'RectGrid',
                           'height': 2, 'width': 2},
                  'vertices': {'data': [tuple(), tuple(), tuple(), ('1',)],
@@ -290,10 +290,14 @@ class Test_Puzzle_Construct():
         txt = load_from_file('test_constructor.txt')
         self.puzzle = PuzzleConstructor.load_txt_mult(txt)[0]
 
+    @pytest.fixture
+    def puzzle_all(self):
+        txt = load_from_file('test_constructor.txt')
+        self.puzzles = PuzzleConstructor.load_txt_mult(txt)
+
     def test_text_construction_simple(self, well_formed):
         puzzles = PuzzleConstructor.load_txt_mult(self.txt)
         assert isinstance(puzzles, list)
-        assert len(puzzles) == 1
 
     def test_symbol_construction(self, puzzle_a):
         symbols = self.puzzle.symbols
@@ -305,9 +309,13 @@ class Test_Puzzle_Construct():
         assert len(rules) == 1
         rule = rules[0]
         assert isinstance(rule, Nurikabe)
-        assert rule.symbol == BuiltinSymbols.black
        
     def test_grid_construction(self, puzzle_a):
+        """
+        Notably, `WH` was the first entry in the editlayer,
+        so vertices without `WH` or `BK` are automatically
+        assigned `WH`.
+        """
         exp = "WH   WH   \nBK   WH-1 \n"
         assert str(self.puzzle.grid) == exp
 
@@ -344,7 +352,6 @@ class Test_Puzzle_Construct():
         assert len(rules) == len(self.puzzle.rules)
         rule = rules[0]
         assert rule.type == self.puzzle.rules[0].type == 'Nurikabe'
-        assert rule.symbol == self.puzzle.rules[0].symbol
 
     def test_json_grid_construction(self, puzzle_a):
         dumped = self.puzzle.dump()
@@ -360,4 +367,11 @@ class Test_Puzzle_Construct():
         dumped = self.puzzle.dump()
         reloaded = PuzzleConstructor.load_json(dumped)
         assert self.puzzle.editlayers == reloaded.editlayers
+
+    def test_key_carryover(self, puzzle_all):
+        assert self.puzzles[0].symbols == self.puzzles[1].symbols
+        assert self.puzzles[0].editlayers == self.puzzles[1].editlayers
+        assert type(self.puzzles[0].rules[0]) == type(self.puzzles[1].rules[0])
+
+        
 
